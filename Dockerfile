@@ -1,20 +1,23 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.19
+# Build Stage
+FROM golang:1.21-alpine AS builder
 
-ENV DEBIAN_FRONTEND noninteractive
+WORKDIR /app
 
-WORKDIR /go/src/github.com/allfro/device-volume-driver
+# Copy and download dependencies first to leverage Docker layer caching
+COPY go.mod go.sum ./
+RUN go mod download
 
+# Copy the rest of the application source code
 COPY . .
 
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags "-linkmode external -extldflags -static" -o /dvd
+# Build the static binary
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags "-linkmode external -extldflags -static" -o /dvd .
 
-FROM alpine
+# Final Stage
+FROM alpine:latest
 
-WORKDIR /
-
-COPY --from=0 /dvd /dvd
+COPY --from=builder /app/dvd /dvd
 
 ENTRYPOINT ["/dvd"]
-
