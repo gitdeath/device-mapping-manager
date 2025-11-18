@@ -27,3 +27,4 @@ FROM alpine:latest
 COPY --from=builder /dvd /dvd
 
 ENTRYPOINT ["/dvd"]
+
