@@ -5,6 +5,9 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
+# Install C compiler tools needed for CGO
+RUN apk add --no-cache build-base
+
 # Copy and download dependencies first to leverage Docker layer caching
 COPY go.mod go.sum ./
 RUN go mod download
