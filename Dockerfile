@@ -24,6 +24,6 @@ RUN CGO_ENABLED=1 GOOS=linux go build -ldflags "-linkmode external -extldflags -
 # Final Stage
 FROM alpine:latest
 
-COPY --from=builder /app/dvd /dvd
+COPY --from=builder /dvd /dvd
 
 ENTRYPOINT ["/dvd"]
