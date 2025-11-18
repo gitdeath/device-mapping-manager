@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	_ "github.com/opencontainers/runtime-spec/specs-go"
@@ -158,7 +159,7 @@ func processContainer(cli *client.Client, id string) {
 }
 
 func checkExistingContainers(cli *client.Client) {
-	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+	containers, err := cli.ContainerList(context.Background(), container.ListOptions{})
 
 	if err != nil {
 		panic(err)
