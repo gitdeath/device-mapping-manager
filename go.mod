@@ -1,6 +1,6 @@
 module device-volume-driver
 
-go 1.21
+go 1.23
 
 require (
 	github.com/cilium/ebpf v0.9.1
