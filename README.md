@@ -30,8 +30,8 @@ To upgrade from an older version, simply stop and remove the existing container,
 
 ```bash
 # Stop and remove existing container
-docker stop device-mapping-manager || true
-docker rm device-mapping-manager || true
+docker stop device-manager || true
+docker rm device-manager || true
 
 # Pull latest image
 docker pull ghcr.io/gitdeath/device-mapping-manager:master
