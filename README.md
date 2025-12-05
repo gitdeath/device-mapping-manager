@@ -10,10 +10,9 @@ This maps and enables devices into containers running on docker swarm. It is cur
 To run the device-mapping-manager, you can use the following `docker run` command. Note that it requires privileged access and specific volume mounts to interact with the host system (Docker, cgroups, and DBus).
 
 ```bash
-docker run -d --restart always \
-  --privileged \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /sys/fs/cgroup:/host/sys/fs/cgroup \
+docker run -d --restart always --name device-manager --privileged \
+  --cgroupns=host --pid=host --userns=host \
+  -v /sys:/host/sys -v /var/run/docker.sock:/var/run/docker.sock \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
   ghcr.io/gitdeath/device-mapping-manager:master
 ```
@@ -38,11 +37,9 @@ docker rm device-mapping-manager || true
 docker pull ghcr.io/gitdeath/device-mapping-manager:master
 
 # Run new version
-docker run -d --restart always \
-  --name device-mapping-manager \
-  --privileged \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /sys/fs/cgroup:/host/sys/fs/cgroup \
+docker run -d --restart always --name device-manager --privileged \
+  --cgroupns=host --pid=host --userns=host \
+  -v /sys:/host/sys -v /var/run/docker.sock:/var/run/docker.sock \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
   ghcr.io/gitdeath/device-mapping-manager:master
 ```
