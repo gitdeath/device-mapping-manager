@@ -15,7 +15,7 @@ docker run -d --restart always \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /sys/fs/cgroup:/host/sys/fs/cgroup \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
-  ndouba/device-mapping-manager
+  ghcr.io/gitdeath/device-mapping-manager:master
 ```
 
 ### Requirements
@@ -35,7 +35,7 @@ docker stop device-mapping-manager || true
 docker rm device-mapping-manager || true
 
 # Pull latest image
-docker pull ndouba/device-mapping-manager
+docker pull ghcr.io/gitdeath/device-mapping-manager:master
 
 # Run new version
 docker run -d --restart always \
@@ -44,5 +44,5 @@ docker run -d --restart always \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /sys/fs/cgroup:/host/sys/fs/cgroup \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
-  ndouba/device-mapping-manager
+  ghcr.io/gitdeath/device-mapping-manager:master
 ```

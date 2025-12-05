@@ -1,6 +1,5 @@
 version: "3.8"
 
-
 services:
   dmm:
     image: docker
@@ -16,6 +15,6 @@ services:
       --userns=host 
       -v /sys:/host/sys 
       -v /var/run/docker.sock:/var/run/docker.sock 
-      ndouba/device-mapping-manager
+      ghcr.io/gitdeath/device-mapping-manager:master
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
