@@ -5,6 +5,7 @@ go 1.23
 require (
 	github.com/cilium/ebpf v0.9.1
 	github.com/docker/docker v26.1.3+incompatible
+	github.com/godbus/dbus/v5 v5.1.0
 	github.com/opencontainers/runtime-spec v1.0.2
 	golang.org/x/sys v0.19.0
 )

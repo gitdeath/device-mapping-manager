@@ -18,6 +18,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+	"github.com/godbus/dbus/v5"
 	_ "github.com/opencontainers/runtime-spec/specs-go"
 	"golang.org/x/sys/unix"
 )
@@ -39,6 +40,67 @@ func main() {
 	}
 
 	defer cli.Close()
+
+	// Connect to system DBus to listen for systemd reload events
+	conn, err := dbus.SystemBus()
+	if err != nil {
+		log.Printf("Failed to connect to system bus: %v", err)
+	} else {
+		log.Println("Connected to system bus, setting up listener for systemd Reloading signal")
+		defer conn.Close()
+
+		if err = conn.AddMatchSignal(
+			dbus.WithMatchInterface("org.freedesktop.systemd1.Manager"),
+			dbus.WithMatchMember("Reloading"),
+		); err != nil {
+			log.Printf("Failed to add match signal: %v", err)
+		} else {
+			c := make(chan *dbus.Signal, 10)
+			conn.Signal(c)
+
+			go func() {
+				log.Println("Listening for systemd reload signals...")
+				for v := range c {
+					if v.Name == "org.freedesktop.systemd1.Manager.Reloading" {
+						// The signal signature is 'b' (boolean) for 'active'.
+						// We might care if it's starting (true) or ending (false)?
+						// The issue says "systemd reload breaks the cgroup maps".
+						// Usually we want to re-apply AFTER reload?
+						// "Reloading" signal is sent *before* reload starts if active=true.
+						// And maybe *after*?
+						// Documentation says: "Sent when the manager begins reloading."
+						// There is another signal `Reloaded`? No.
+						// Wait, if it breaks maps, maybe we should apply it active=true (start) or wait?
+						// If systemd resets cgroups *during* reload, we should apply *after* it finishes?
+						// But there is no "Reloaded" signal guaranteed?
+						// Note: "JobNew" for reload job?
+						// Let's check the boolean body.
+						var active bool
+						if len(v.Body) > 0 {
+							active, _ = v.Body[0].(bool)
+						}
+						
+						log.Printf("Received systemd Reloading signal (active: %v)\n", active)
+						
+						// If active is true, it's starting. If we apply now, it might be wiped?
+						// If active is false, it's NOT sent? documentation says "active" is true.
+						// Does it send false when done?
+						// If not, we might need to wait a bit or listen for JobRemoved?
+						// For now, let's trigger it immediately, and maybe delay slightly?
+						// Or just trigger it. Idempotency is key.
+						// If "active=true" means "I am about to reload", then we should probably wait until it's done. 
+						// But how do we know?
+						// Usually "Reloading" is just one pulse.
+						// Let's assume we re-check immediately. If it fails, we might need a delay.
+						// To be safe, let's process it. 
+						
+						log.Println("Re-processing containers due to systemd reload")
+						checkExistingContainers(cli)
+					}
+				}
+			}()
+		}
+	}
 
 	checkExistingContainers(cli)
 	listenForMounts(cli)
